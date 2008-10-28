@@ -3,7 +3,7 @@ module ActiveSesame
     require 'rest-open-uri'
     require 'uri'
 
-      @@repository_uri = "http://localhost:8111/sesame/repositories"
+      @@repository_uri = "http://localhost:8112/sesame/repositories"
       @@triple_store_id = "go-for-ryan"
       @@location = @@repository_uri + "/" + @@triple_store_id
       @@prefixes = ["PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
@@ -14,7 +14,7 @@ module ActiveSesame
 
       def self.find_by_sparql(query, include_prefixes=true)
         #puts self.base_uri + " " + @@prefixes.join(" ") + " " + query
-        rest_call("", :method => :get, :body => {:query => self.base_uri + " " + @@prefixes.join(" ") + " " + query, :queryLn => "SPARQL"})
+        rest_call("", :method => :get, :body => {:infer => "false", :queryLn => "SPARQL", :query => @@base + " " + @@prefixes.join(" ") + " " + query})
       end
 
       def self.group_save(xml)
@@ -66,7 +66,7 @@ module ActiveSesame
 #      end
 
       def self.set_base_uri(base_uri)
-        self.base_uri = "BASE <#{base_uri}>"
+        @@base = "BASE <#{base_uri}>"
       end
 
       def self.simple_rest_methods(*method_names)
@@ -77,6 +77,7 @@ module ActiveSesame
       end
 
       self.simple_rest_methods :size, :contexts, :namespaces
+      self.set_base_uri "http://www.geneontology.org/formats/oboInOwl"
 
       def self.rest_call(method_name, args={})
         args[:body][:query] = encode_sparql(args[:body][:query]) if args[:body][:query] if args[:body]

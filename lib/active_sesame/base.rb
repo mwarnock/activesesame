@@ -1,6 +1,5 @@
 module ActiveSesame
 class Base
-  include Repository
   ActiveSesame::MonkeyPatches #Run The monkey Patches
   
   def Base.inherited(subClass)
@@ -11,6 +10,7 @@ class Base
     #Create class variables that are independant of the super class
     class << self
       attr_accessor :rdf_class, :triple_store_id, :base_uri, :unique_property, :unique_property_type, :attributes, :attribute_method_names
+      attr_accessor :connection
       attr_accessor :simple_attributes, :simple_method_names
       attr_accessor :complex_attributes, :complex_method_names
     end
@@ -27,6 +27,7 @@ class Base
     subClass.simple_method_names = []
     subClass.complex_attributes = {}
     subClass.complex_method_names = []
+    subClass.connection = Repository.new
 
     #Create the attribute accessors for instances
     attr_accessor :attribute_table, :instance, :transaction_triples
@@ -53,7 +54,7 @@ class Base
 
     def subClass.set_attributes
       #puts "SELECT ?property_name ?property_type WHERE { ?property_name rdfs:domain <#{rdf_class}>; rdfs:range ?property_type }"
-      self.attributes = ResultParser.hash_values(self.find_by_sparql("SELECT ?property_name ?property_type WHERE { ?property_name rdfs:domain <#{rdf_class}>; rdfs:range ?property_type }"))
+      self.attributes = ResultParser.hash_values(self.connection.find_by_sparql("SELECT ?property_name ?property_type WHERE { ?property_name rdfs:domain <#{rdf_class}>; rdfs:range ?property_type }"))
       self.attributes.each do |uri,type|
         if RDFConstants.literals.include?(type) 
           self.simple_attributes[uri] = type
@@ -117,8 +118,8 @@ class Base
         self.class_eval(
           "def self.find_by_#{m} (value)
           #puts \"SELECT \#{self.attributes_to_sparql_vars} WHERE { ?instance <#{m}> '\#{value}'^^\#{ActiveSesame::RDFConstants.class_to_match_hash[value.class]} . \#{self.attributes_to_sparql_patterns}}\"
-               self.new(ResultParser.tableize(self.find_by_sparql(\"SELECT \#{self.attributes_to_sparql_vars} WHERE { ?instance <#{m}> '\#{value}' . \#{self.attributes_to_sparql_patterns}}\")).first)
-               #puts self.find_by_sparql(\"SELECT \#{self.attributes_to_sparql_vars} WHERE { ?instance <#{m}> '\#{value}'^^\#{ActiveSesame::RDFConstants.class_to_match_hash[value.class]} . \#{self.attributes_to_sparql_patterns}}\")
+               self.new(ResultParser.tableize(self.connection.find_by_sparql(\"SELECT \#{self.attributes_to_sparql_vars} WHERE { ?instance <#{m}> '\#{value}' . \#{self.attributes_to_sparql_patterns}}\")).first)
+               #puts self.connection.find_by_sparql(\"SELECT \#{self.attributes_to_sparql_vars} WHERE { ?instance <#{m}> '\#{value}'^^\#{ActiveSesame::RDFConstants.class_to_match_hash[value.class]} . \#{self.attributes_to_sparql_patterns}}\")
 	     end") #When you fix the datatype attributes in allegro graph you need to change this function or you'll get nils
       end
     end
@@ -148,18 +149,18 @@ class Base
       if unique_uri_or_length.class != Symbol
         begin
           puts "SELECT #{self.attributes_to_sparql_vars.gsub("?instance","")} WHERE { #{self.attributes_to_sparql_patterns.gsub("?instance",'<' + unique_uri_or_length + '>')}}"
-          graph_object = self.new(ResultParser.tableize(self.find_by_sparql("SELECT #{self.attributes_to_sparql_vars.gsub("?instance","")} WHERE { #{self.attributes_to_sparql_patterns.gsub("?instance",'<' + unique_uri_or_length + '>')}}")).first)
+          graph_object = self.new(ResultParser.tableize(self.connection.find_by_sparql("SELECT #{self.attributes_to_sparql_vars.gsub("?instance","")} WHERE { #{self.attributes_to_sparql_patterns.gsub("?instance",'<' + unique_uri_or_length + '>')}}")).first)
           graph_object.instance = unique_uri_or_length
           return graph_object
         rescue
           return nil
         end
       elsif args.has_key?(:sparql) #Submit Pure Sparql without Object Creation (Returns Hash)
-        (ResultParser.tableize(self.find_by_sparql(:sparql)))
+        (ResultParser.tableize(self.connection.find_by_sparql(:sparql)))
       elsif args.has_key?(:simple_conditional) #Returns objects that match the simple_condition, if specified, and apply the length operator via the send method
-        (ResultParser.tableize(self.find_by_sparql("SELECT #{self.attributes_to_sparql_vars} WHERE {?instance rdf:type <#{self.rdf_class}> . #{args[:simple_conditional]} OPTIONAL {#{self.attributes_to_sparql_patterns}} . }")).collect {|table| self.new(table)}).send(unique_uri_or_length)
+        (ResultParser.tableize(self.connection.find_by_sparql("SELECT #{self.attributes_to_sparql_vars} WHERE {?instance rdf:type <#{self.rdf_class}> . #{args[:simple_conditional]} OPTIONAL {#{self.attributes_to_sparql_patterns}} . }")).collect {|table| self.new(table)}).send(unique_uri_or_length)
       else
-        (ResultParser.tableize(self.find_by_sparql("SELECT #{self.attributes_to_sparql_vars} WHERE {?instance rdf:type <#{self.rdf_class}> . OPTIONAL {#{self.attributes_to_sparql_patterns}} . }")).collect {|table| self.new(table)}).send(unique_uri_or_length)
+        (ResultParser.tableize(self.connection.find_by_sparql("SELECT #{self.attributes_to_sparql_vars} WHERE {?instance rdf:type <#{self.rdf_class}> . OPTIONAL {#{self.attributes_to_sparql_patterns}} . }")).collect {|table| self.new(table)}).send(unique_uri_or_length)
       end
     end
 
