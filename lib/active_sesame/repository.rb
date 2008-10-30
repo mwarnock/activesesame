@@ -77,10 +77,10 @@ module ActiveSesame
 
     def default_options
       { :repository_uri => "http://localhost:8111/sesame/repositories",
-        :triple_store_id => "go-for-ryan",
-        :location => "http://localhost:8111/sesame/repositories/go-for-ryan",
+        :triple_store_id => "demo",
+        :location => "http://localhost:8111/sesame/repositories/demo",
         :query_language => "SPARQL",
-        :base_uri => "BASE <http://study-stash.radiology.umm.edu/ontologies>"
+        :base_uri => "BASE <http://ubio.org/ontologies/demo#>"
       }
     end
 
