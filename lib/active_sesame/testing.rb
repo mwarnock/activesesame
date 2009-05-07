@@ -86,8 +86,8 @@ module ActiveSesame
         args[:body][:obj] = encode_sparql(args[:body][:obj]) if args[:body][:obj] if args[:body]
         [:get, :put, :delete].include?(args[:method]) ? vars_if_get = hash_to_get(args[:body]) : vars_if_get = ""
         method_name == "" ? slash = "" : slash = "/"
-	#puts @@location + slash + method_name.to_s + vars_if_get
-        #puts self.repository_uri + "/" + self.triple_store_id + slash + method_name.to_s + vars_if_get
+	puts @@location + slash + method_name.to_s + vars_if_get
+        puts self.repository_uri + "/" + self.triple_store_id + slash + method_name.to_s + vars_if_get
         return open(self.repository_uri + "/" + self.triple_store_id + slash + method_name.to_s + vars_if_get, args).read
       end
 
