@@ -17,8 +17,11 @@ module ActiveSesame
     end
 
     def find_by_sparql(query, include_prefixes=true)
-      #puts self.base_uri + " " + @@prefixes.join(" ") + " " + query
-      query_dispatch("", :method => :get, :body => {:query => self.base_uri + " " + self.prefixes.join(" ") + " " + query, :queryLn => "SPARQL"})
+      query_dispatch("", :method => :get, :body => {:query => self.sparql_base + " " + self.prefixes.join(" ") + " " + query, :queryLn => "SPARQL"})
+    end
+
+    def find(query, include_prefixes=true)
+      ActiveSesame::ResultParser.tableize(find_by_sparql(query, include_prefixes))
     end
 
     def group_save(xml)
@@ -37,6 +40,10 @@ module ActiveSesame
 
     def add_prefix(prefix)
       self.prefixes = (self.prefixes << prefix)
+    end
+
+    def sparql_base
+      "BASE <#{base_uri}>"
     end
 
   end
@@ -81,7 +88,7 @@ module ActiveSesame
         :triple_store_id => "radlex",
         :location => "http://localhost:8111/sesame/repositories/radlex",
         :query_language => "SPARQL",
-        :base_uri => "BASE <http://protege.stanford.edu/rdf>"
+        :base_uri => "http://www.owl-ontologies.com/Ontology1241733063.owl#"
       }
     end
 

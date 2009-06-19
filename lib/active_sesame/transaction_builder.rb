@@ -10,17 +10,22 @@ module ActiveSesame
       end
     end
 
-    def self.build_triple(s,p,o, trans_type='add')
-      xml = "<#{trans_type}>"
-      [s,p,o].each do |uri_or_literal|
-        if uri_or_literal =~ /http:\/\//
-	  xml += "<uri>&lt;#{uri_or_literal}&gt;</uri>"
-	else
-	  #xml += "\t\t<literal datatype=\"&lt;#{RDFConstants.class_to_literal[uri_or_literal.class]}&gt;\">#{uri_or_literal}</literal>\n"
-	  xml += "<literal>#{uri_or_literal}</literal>"
-	end
+    def self.build_triples(list_of_triples, trans_type='add')
+      xml_for_transation = list_of_triples.inject("<#{trans_type}>") do |xml, triple|
+        triple_hash = triple.to_h
+        xml += type_cast(triple_hash[:subject]) + type_cast(triple_hash[:predicate]) + type_cast(triple_hash[:object])
+        xml
       end
-      xml += "</#{trans_type}>"
+      xml_for_transation += "</#{trans_type}>"
+    end
+
+    def self.type_cast(uri_or_literal)
+      if uri_or_literal =~ /http:\/\//
+        "<uri>&lt;#{uri_or_literal}&gt;</uri>"
+      else
+        #xml += "\t\t<literal datatype=\"&lt;#{RDFConstants.class_to_literal[uri_or_literal.class]}&gt;\">#{uri_or_literal}</literal>\n"
+        "<literal>#{uri_or_literal}</literal>"
+      end
     end
 
   end

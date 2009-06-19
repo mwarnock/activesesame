@@ -17,5 +17,23 @@ module ActiveSesame
     def self.uncode_whitespace(string)
       return string.class == String ? string.gsub("%20"," ") : string
     end
+
+    def is_uri?(string)
+      string =~ /^http:\/\//
+    end
+  end
+
+  class Triple < Hash
+    def method_missing(method, *args, &block)
+      if self.has_key(method)
+        self[method]
+      else
+        super(method, *args, &block)
+      end
+    end
+
+    def to_hash
+      self
+    end
   end
 end
