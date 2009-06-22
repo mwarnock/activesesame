@@ -17,7 +17,7 @@ module ActiveSesame::Behaviors
 
 
     def ontology
-      ActiveSesame::Ontology::Term.new(self.send(self.class.ontology_attribute))
+      @ontology ||= ActiveSesame::Ontology::Term.new(self.send(self.class.ontology_attribute))
     end
   end
 

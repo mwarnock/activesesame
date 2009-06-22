@@ -9,7 +9,7 @@ describe ActiveSesame do
     ActiveSesame.const_defined?("RDFConstants").should be_true
     ActiveSesame.const_defined?("MonkeyPatches").should be_true
     ActiveSesame.const_defined?("Support").should be_true
-    #ActiveSesame.const_defined?("Ontology").should be_true
+    ActiveSesame.const_defined?("Ontology").should be_true
     ActiveSesame.const_defined?("Behaviors").should be_true
   end
 
@@ -38,6 +38,10 @@ describe ActiveSesame do
 
       it "should have relationships" do
         @term.ontology.relationships.keys.size.should_not be_equal(0)
+      end
+
+      it "'s relationships should include an ontology term" do
+        @term.ontology.Is_A.class.should == ActiveSesame::Ontology::Term
       end
 
     end
