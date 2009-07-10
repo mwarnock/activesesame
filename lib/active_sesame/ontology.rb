@@ -15,8 +15,8 @@ module ActiveSesame::Ontology
       end
     end
 
-    def initialize(ontoterm)
-      @@repo ||= ActiveSesame::Repository.new
+    def initialize(ontoterm, repo = ActiveSesame::Repository.new)
+      @@repo = repo
       @term = ontoterm
       set_relationships
     end
