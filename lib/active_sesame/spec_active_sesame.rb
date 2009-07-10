@@ -1,6 +1,22 @@
 require 'active_sesame'
+require 'spec_helpers'
 
 describe ActiveSesame do
+  before(:all) do
+    @repo = ActiveSesame::Repository.new(ActiveSesame::SesameProtocol, {
+                                           :repository_uri => "http://localhost:8111/sesame/repositories",
+                                           :triple_store_id => "test",
+                                           :location => "http://localhost:8111/sesame/repositories/test",
+                                           :query_language => "SPARQL",
+                                           :base_uri => "http://www.fakeontology.org/ontology.owl#"
+                                         })
+    @repo.group_save(ActiveSesame::TransactionBuilder.build_triples(SpecHelpers.triples_to_add, "add"))
+  end
+
+  after(:all) do
+    @repo.group_save(ActiveSesame::TransactionBuilder.build_triples(SpecHelpers.triples_to_add, "remove"))
+  end
+
   it "should load all it's libraries" do
     ActiveSesame.const_defined?("Base").should be_true
     ActiveSesame.const_defined?("Repository").should be_true
@@ -11,12 +27,6 @@ describe ActiveSesame do
     ActiveSesame.const_defined?("Support").should be_true
     ActiveSesame.const_defined?("Ontology").should be_true
     ActiveSesame.const_defined?("Behaviors").should be_true
-  end
-
-  describe ActiveSesame::Repository do
-    it "should connect to a triple store" do
-      ActiveSesame::Repository.new
-    end
   end
 
   describe ActiveSesame::Behaviors do
@@ -57,3 +67,32 @@ describe ActiveSesame do
   describe ActiveSesame::Base do
   end
 end
+
+describe ActiveSesame::Repository do
+  before do
+    @repo = ActiveSesame::Repository.new(ActiveSesame::SesameProtocol, {
+                                           :repository_uri => "http://localhost:8111/sesame/repositories",
+                                           :triple_store_id => "test",
+                                           :location => "http://localhost:8111/sesame/repositories/test",
+                                           :query_language => "SPARQL",
+                                           :base_uri => "http://www.fakeontology.org/ontology.owl#"
+                                         })
+  end
+
+  it "should add triples to the store" do
+    @repo.group_save(ActiveSesame::TransactionBuilder.build_triples(SpecHelpers.triples_to_add, "add"))
+    @repo.size.to_i.should_not be_equal(0)
+  end
+
+  it "should remove triples from the store" do
+    @repo.group_save(ActiveSesame::TransactionBuilder.build_triples(SpecHelpers.triples_to_add, "remove"))
+    @repo.size.to_i.should be_equal(0)
+  end
+
+  it "should be able to connect to the test triple store" do
+    results = open("http://localhost:8111/sesame/repositories", :method => :get).read
+    results.include?("http://localhost:8111/sesame/repositories/test").should be_true
+  end
+end
+
+

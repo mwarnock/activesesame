@@ -25,8 +25,6 @@ module ActiveSesame
     end
 
     def group_save(xml)
-      xml = "<transaction>#{xml}</transaction>"
-      #puts xml
       query_dispatch("statements", {:method => :post, "content-type" => "application/x-rdftransaction", :body => xml})
     end
 
@@ -52,7 +50,7 @@ module ActiveSesame
     require 'rest-open-uri'
     require 'uri'
 
-    def included(klass)
+    def self.extended(klass)
       simple_rest_methods :size, :contexts, :namespaces
     end
 
@@ -66,7 +64,7 @@ module ActiveSesame
       return open(self.repository_uri + "/" + self.triple_store_id + slash + method_name.to_s + vars_if_get, args).read
     end
 
-    def simple_rest_methods(*method_names)
+    def self.simple_rest_methods(*method_names)
       method_names.each do |name|
         new_name = name.to_s
         define_method(new_name) { return query_dispatch(name) }
