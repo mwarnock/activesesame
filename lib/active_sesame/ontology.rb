@@ -47,9 +47,4 @@ module ActiveSesame::Ontology
     end
   end
 
-  #Cool idea, not sure what I had in mind anymore
-  #module Mutator
-  #  def self.mutate_owl_class(klass)
-  #  end
-  #end
 end

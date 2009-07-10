@@ -2,20 +2,6 @@ require 'active_sesame'
 require 'spec_helpers'
 
 describe ActiveSesame do
-  before(:all) do
-    @repo = ActiveSesame::Repository.new(ActiveSesame::SesameProtocol, {
-                                           :repository_uri => "http://localhost:8111/sesame/repositories",
-                                           :triple_store_id => "test",
-                                           :location => "http://localhost:8111/sesame/repositories/test",
-                                           :query_language => "SPARQL",
-                                           :base_uri => "http://www.fakeontology.org/ontology.owl#"
-                                         })
-    @repo.group_save(ActiveSesame::TransactionBuilder.build_triples(SpecHelpers.triples_to_add, "add"))
-  end
-
-  after(:all) do
-    @repo.group_save(ActiveSesame::TransactionBuilder.build_triples(SpecHelpers.triples_to_add, "remove"))
-  end
 
   it "should load all it's libraries" do
     ActiveSesame.const_defined?("Base").should be_true
@@ -31,13 +17,22 @@ describe ActiveSesame do
 
   describe ActiveSesame::Behaviors do
     describe ActiveSesame::Behaviors::Ontology do
-      before do
+      before(:all) do
+        @repo = SpecHelpers.repository
+        SpecHelpers.populate_triple_store
+      end
+
+      after(:all) do
+        SpecHelpers.clear_triple_store
+      end
+
+      before(:each) do
         class TermTest
           attr_accessor :name
-          ActiveSesame::Behaviors::Ontology.mimic(self)
+          ActiveSesame::Behaviors::Ontology.mimic(self, :repository => SpecHelpers.repository)
         end
         @term = TermTest.new
-        @term.name = "http://www.owl-ontologies.com/Ontology1241733063.owl#RID3436"
+        @term.name = "http://www.fakeontology.org/ontology.owl#Enders_Game"
       end
 
       it "should bootstrap the class" do
@@ -50,7 +45,7 @@ describe ActiveSesame do
       end
 
       it "'s relationships should include an ontology term" do
-        @term.ontology.Is_A.class.should == ActiveSesame::Ontology::Term
+        @term.ontology.author.class.should be_equal(ActiveSesame::Ontology::Term)
       end
 
     end
