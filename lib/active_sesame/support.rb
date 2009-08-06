@@ -19,7 +19,11 @@ module ActiveSesame
     end
 
     def is_uri?(string)
-      string =~ /^http:\/\//
+      if string.class == String
+        string =~ /^http:\/\//
+      else
+        false
+      end
     end
   end
 

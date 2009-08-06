@@ -25,6 +25,12 @@ module ActiveSesame::Ontology
       set_relationships
     end
 
+    def to_triples
+      self.relationship_map.collect do |po_hash|
+        {:subject => self.term, :predicate => po_hash["predicate"], :object => po_hash["object"]}
+      end
+    end
+
     private
     def set_relationships
       if self.class.is_uri?(@term)
