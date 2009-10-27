@@ -96,6 +96,10 @@ describe ActiveSesame::OwlThing do
     end
   end
 
+  it "should have a term" do
+    ActiveSesame::OwlThing.term.term
+  end
+
   it "should create a new thing with a generated uri" do
     thing = ActiveSesame::OwlThing.new()
     thing.term.term.should =~ /#{ActiveSesame::OwlThing.repository.base_uri}\#.*/

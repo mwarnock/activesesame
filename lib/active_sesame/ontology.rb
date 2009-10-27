@@ -43,7 +43,7 @@ module ActiveSesame::Ontology
     def add_relationship(triple)
       triple[:subject] = self.term unless triple.class == ActiveSesame::Triple and not (triple.has_key?[:subject] or triple.has_key?["subject"])
       triple = triple.to_triple
-      key = self.class.method_from_uri(triple.predicate, :base => self.class.repository.base_uri) #This is using rdf constants
+      key = self.class.method_from_uri(triple.predicate, "base" => self.class.repository.base_uri) #This is using rdf constants
       if not self.relationships.has_key?(key)
         self.relationships[key] = triple.object
       elsif self.relationships[key].class != Array
@@ -76,7 +76,7 @@ module ActiveSesame::Ontology
 
     private
     def set_relationships
-      @term = self.class.expand_term(@term, "base" => self.class.repository.base_uri)
+      @term = self.class.expand_term(@term, self.class.repository.prefixes.merge({"base" => self.class.repository.base_uri}))
       if self.class.is_uri?(@term)
         @term_type = "uri"
         @relationship_map ||= self.class.repository.find("SELECT ?predicate ?object WHERE { <#{@term}> ?predicate ?object }")
