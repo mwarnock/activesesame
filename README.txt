@@ -1,32 +1,9 @@
-= active_sesame
-
-* FIX (url)
-
-== DESCRIPTION:
-
-FIX (describe your package)
-
-== FEATURES/PROBLEMS:
-
-* FIX (list of features or problems)
-
-== SYNOPSIS:
-
-  FIX (code sample of usage)
-
-== REQUIREMENTS:
-
-* FIX (list of requirements)
-
-== INSTALL:
-
-* FIX (sudo gem install, anything else)
-
-== LICENSE:
+See the wiki for details:
+http://wiki.github.com/mwarnock/activesesame
 
 (The MIT License)
 
-Copyright (c) 2008 FIX
+Copyright (c) 2008 ActiveSesame
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
