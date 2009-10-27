@@ -5,7 +5,7 @@ module SpecHelpers
                                    :triple_store_id => "test",
                                    :location => "http://localhost:8111/sesame/repositories/test",
                                    :query_language => "SPARQL",
-                                   :base_uri => "http://www.fakeontology.org/ontology.owl#"
+                                   :base_uri => "http://www.fakeontology.org/ontology.owl"
                                  })
   end
 
@@ -21,7 +21,7 @@ module SpecHelpers
     [
      {:subject => "base:Book", :predicate => "rdfs:subClassOf", :object => "owl:Thing"},
      {:subject => "base:Enders_Game", :predicate => "rdfs:subClassOf", :object => "base:Book"},
-     {:subject => "base:Enders_Game", :predicate => "base:author", :object => "Orson Scott Card"},
+     {:subject => "base:Enders_Game", :predicate => "base:author", :object => "base:Orson_Scott_Card"},
      {:subject => "base:Enders_Game", :predicate => "base:title", :object => "Ender's Game"},
      {:subject => "base:Speaker_For_The_Dead", :predicate => "base:title", :object => "Speaker for the Dead"},
      {:subject => "base:Speaker_For_The_Dead", :predicate => "base:author", :object => "base:Orson_Scott_Card"},

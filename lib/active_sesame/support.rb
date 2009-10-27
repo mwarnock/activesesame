@@ -29,11 +29,10 @@ module ActiveSesame
     end
 
     def uri_to_prefix(uri, additional_uris={})
-      puts uri.inspect
       uri_prefix, term = uri.split("#")
       uri_prefixes = ActiveSesame::RDFConstants.prefixes.merge(additional_uris)
       uri_prefixes = uri_prefixes.keys.inject(Hash.new) {|hash,key| hash[uri_prefixes[key]] = key; hash} #reverse key and value
-      puts "\n" + uri_prefixes.inspect + "\n"
+      #puts "\n" + uri_prefixes.inspect + "\n"
       if uri_prefixes.has_key?(uri_prefix)
         uri_prefixes[uri_prefix]
       else
@@ -42,30 +41,42 @@ module ActiveSesame
     end
 
     def method_from_uri(uri, additional_uris={})
-      uri_prefix = self.uri_to_prefix(uri)
+      #puts "uris for doober: #{additional_uris.inspect}"
+      #puts "uri to be transformed to method #{uri}"
+      #puts "method generated: #{self.uri_to_prefix(uri, additional_uris)}"
+      uri_prefix = self.uri_to_prefix(uri, additional_uris)
       bogus, term = uri.split("#")
       term ? "#{uri_prefix}_#{term}" : uri_prefix
     end
 
-    def expand_triples(triple_list)
-      triple_list.collect {|triple| expand_triple(triple) }
+    def expand_triples(triple_list, additional_uris={})
+      #puts "\n#{additional_uris.inspect}\n"
+      triple_list.collect {|triple| expand_triple(triple, additional_uris) }
     end
 
-    def expand_triple(triple)
-      triple.keys.inject(Hash.new) {|hash,key| hash[key] = expand_term(triple[key]); hash }
+    def expand_triple(triple, additional_uris={})
+      #puts "\n#{additional_uris.inspect}\n"
+      triple.keys.inject(Hash.new) {|hash,key| hash[key] = expand_term(triple[key], additional_uris); hash }
     end
 
-    def expand_terms(term_list)
+    def expand_terms(term_list, additional_uris={})
+      #puts "\n#{additional_uris.inspect}\n"
       term_list.collect {|term| self.expand_term(term) }
     end
 
-    def expand_term(full_term)
+    def expand_term(full_term, additional_uris={})
+      #puts "\n#{additional_uris.inspect}\n"
       prefix, term = full_term.split(":")
-      (term != nil and not is_uri?(full_term)) ? expand_prefix(prefix) + "#" + term : full_term
+      (term != nil and not is_uri?(full_term)) ? expand_prefix(prefix, additional_uris) + "#" + term : full_term
     end
 
-    def expand_prefix(prefix)
-      ActiveSesame::RDFConstants.prefixes.merge(:base => self.repository.base_uri)[prefix.to_sym]
+    def expand_prefix(prefix, additional_uris={})
+      #puts "\n#{additional_uris.inspect}\n"
+      if additional_uris.has_key?(prefix)
+        additional_uris[prefix]
+      else
+        throw "Invalid Prefix: the prefix \"#{prefix}\" was not found in #{additional_uris.inspect}"
+      end
     end
 
   end

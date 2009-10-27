@@ -1,11 +1,11 @@
 module ActiveSesame
   class Repository
 
-    @@prefixes = ["PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
-                  "PREFIX ss: <http://study-stash.radiology.umm.edu/ontologies/study-stash.owl#>",
-                  "PREFIX owl: <http://www.w3.org/2002/07/owl#>",
-                  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-                  "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"]
+    @@prefixes = {"xsd" => "http://www.w3.org/2001/XMLSchema#",
+      "ss" => "http://study-stash.radiology.umm.edu/ontologies/study-stash.owl",
+      "owl" => "http://www.w3.org/2002/07/owl",
+      "rdf" => "http://www.w3.org/1999/02/22-rdf-syntax-ns",
+      "rdfs" => "http://www.w3.org/2000/01/rdf-schema"}
 
     attr_accessor :triple_store_id, :repository_uri, :repository_location, :base_uri, :connector, :prefixes
 
@@ -17,7 +17,7 @@ module ActiveSesame
     end
 
     def find_by_sparql(query, include_prefixes=true)
-      query_dispatch("", :method => :get, :body => {:query => self.sparql_base + " " + self.prefixes.join(" ") + " " + query, :queryLn => "SPARQL"})
+      query_dispatch("", :method => :get, :body => {:query => self.sparql_base + " " + self.prefixes_to_sparql + " " + query, :queryLn => "SPARQL"})
     end
 
     def find(query, include_prefixes=true)
@@ -36,12 +36,20 @@ module ActiveSesame
       query_dispatch("statements", {:method => :delete, :body => {:subj => subject, :pred => predicate, :obj => object}})
     end
 
-    def add_prefix(prefix)
-      self.prefixes = (self.prefixes << prefix)
+    def add_prefix(prefix, uri)
+      self.prefixes = self.prefixes.merge({prefix => uri})
+    end
+
+    def add_prefixes(prefix_hash)
+      self.prefixes = self.prefixes.merge(prefix_hash)
     end
 
     def sparql_base
       "BASE <#{base_uri}>"
+    end
+
+    def prefixes_to_sparql
+      self.prefixes.keys.inject("") {|sparql,key| sparql += "PREFIX #{key}: <#{self.prefixes[key]}> " }
     end
 
   end
@@ -86,7 +94,7 @@ module ActiveSesame
         :triple_store_id => "radlex",
         :location => "http://localhost:8111/sesame/repositories/radlex",
         :query_language => "SPARQL",
-        :base_uri => "http://www.owl-ontologies.com/Ontology1241733063.owl#"
+        :base_uri => "http://www.owl-ontologies.com/Ontology1241733063.owl"
       }
     end
 

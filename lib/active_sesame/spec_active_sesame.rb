@@ -45,7 +45,7 @@ describe ActiveSesame do
       end
 
       it "'s relationships should include an ontology term" do
-        @term.ontology.author.class.should be_equal(ActiveSesame::Ontology::Term)
+        @term.ontology.base_author.class.should be_equal(ActiveSesame::Ontology::Term)
       end
 
     end
@@ -90,4 +90,44 @@ describe ActiveSesame::Repository do
   end
 end
 
+describe ActiveSesame::OwlThing do
+  before do
+    class Book < ActiveSesame::OwlThing
+    end
+  end
 
+  it "should create a new thing with a generated uri" do
+    thing = ActiveSesame::OwlThing.new()
+    thing.term.term.should =~ /#{ActiveSesame::OwlThing.repository.base_uri}\#.*/
+  end
+
+  it "should build a class with the correct relationships" do
+    class Author < ActiveSesame::OwlThing
+    end
+    Author.term.class.should be_equal(ActiveSesame::Ontology::Term)
+    Author.term.unsaved_triples.first[:predicate].should == "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+  end
+
+  it "should pass unknown methods to term" do
+    Book.respond_to?(:unsaved_triples).should be_equal(false)
+    Book.unsaved_triples.class.should be_equal(Array)
+  end
+
+  it "should have the correct uri and repository when setters are called" do
+    class Author < ActiveSesame::OwlThing
+      set_repository SpecHelpers.repository
+    end
+    Author.repository.base_uri.should == SpecHelpers.repository.base_uri
+    Author.unsaved_triples.first[:subject].should == "http://www.fakeontology.org/ontology.owl#Author"
+    Author.set_uri("http://bogus.org/ontology.owl#JimBob")
+    Author.repository.base_uri.should == SpecHelpers.repository.base_uri
+    Author.unsaved_triples.first[:subject].should == "http://bogus.org/ontology.owl#JimBob"
+    Author.term.term.should == "http://bogus.org/ontology.owl#JimBob"
+  end
+
+  it "should create a new instance with the correct rdf_type" do
+    nb = Book.new
+    nb.unsaved_triples.first[:predicate].should == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    nb.unsaved_triples.first[:object].should == Book.term.term
+  end
+end
