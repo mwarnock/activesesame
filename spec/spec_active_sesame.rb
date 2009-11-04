@@ -1,5 +1,5 @@
-require 'active_sesame'
-require 'spec_helpers'
+require File.join(File.dirname(__FILE__), "..","lib","activesesame.rb")
+require File.join(File.dirname(__FILE__), 'spec_helpers')
 
 describe ActiveSesame do
 
@@ -65,13 +65,7 @@ end
 
 describe ActiveSesame::Repository do
   before do
-    @repo = ActiveSesame::Repository.new(ActiveSesame::SesameProtocol, {
-                                           :repository_uri => "http://localhost:8111/sesame/repositories",
-                                           :triple_store_id => "test",
-                                           :location => "http://localhost:8111/sesame/repositories/test",
-                                           :query_language => "SPARQL",
-                                           :base_uri => "http://www.fakeontology.org/ontology.owl#"
-                                         })
+    @repo = SpecHelpers.repository
   end
 
   it "should add triples to the store" do

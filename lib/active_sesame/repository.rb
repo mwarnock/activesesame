@@ -91,10 +91,10 @@ module ActiveSesame
     def default_options
       {
         :repository_uri => "http://localhost:8111/sesame/repositories",
-        :triple_store_id => "radlex",
-        :location => "http://localhost:8111/sesame/repositories/radlex",
+        :triple_store_id => "test",
+        :location => "http://localhost:8111/sesame/repositories/test",
         :query_language => "SPARQL",
-        :base_uri => "http://www.owl-ontologies.com/Ontology1241733063.owl"
+        :base_uri => "http://www.fakeontology.org/ontology.owl"
       }
     end
 
